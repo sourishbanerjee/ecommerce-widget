@@ -6,6 +6,15 @@
         }
 
         init() {
+            // First, make sure we're in the top window
+            if (window.top !== window) {
+                // If we're in an iframe, send message to parent
+                window.parent.postMessage({
+                    type: 'CREATE_WIDGET',
+                    config: this.config
+                }, '*');
+                return;
+            }
             this.injectStyles();
             this.createWidget();
             this.setupEventListeners();
@@ -14,38 +23,24 @@
         injectStyles() {
             const styles = `
                 .ea-widget-container {
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    z-index: 999999;
-                    font-family: system-ui, -apple-system, sans-serif;
+                    position: fixed !important;
+                    bottom: 20px !important;
+                    right: 20px !important;
+                    z-index: 999999 !important;
+                    font-family: system-ui, -apple-system, sans-serif !important;
                 }
                 .ea-widget-button {
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 50%;
-                    background-color: ${this.config.primaryColor || '#24573F'};
-                    color: white;
-                    border: none;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                }
-                .ea-chat-container {
-                    position: fixed;
-                    bottom: 100px;
-                    right: 20px;
-                    width: 380px;
-                    height: 600px;
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-                    display: none;
-                }
-                .ea-chat-container.active {
-                    display: block;
+                    width: 60px !important;
+                    height: 60px !important;
+                    border-radius: 50% !important;
+                    background-color: ${this.config.primaryColor || '#24573F'} !important;
+                    color: white !important;
+                    border: none !important;
+                    cursor: pointer !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
                 }
             `;
             const styleSheet = document.createElement('style');
@@ -54,6 +49,7 @@
         }
 
         createWidget() {
+            console.log('Creating widget with config:', this.config);
             // Create main container
             const container = document.createElement('div');
             container.className = 'ea-widget-container';
@@ -63,34 +59,20 @@
             button.className = 'ea-widget-button';
             button.innerHTML = '💬';
             
-            // Create chat container
-            const chat = document.createElement('div');
-            chat.className = 'ea-chat-container';
-            chat.innerHTML = `
-                <h3>${this.config.companyName || 'Chat'}</h3>
-                <div>This is a test chat widget</div>
-            `;
-            
-            // Append elements
             container.appendChild(button);
-            container.appendChild(chat);
             document.body.appendChild(container);
             
-            // Store references
-            this.container = container;
-            this.button = button;
-            this.chat = chat;
+            console.log('Widget created!');
         }
 
         setupEventListeners() {
-            this.button.addEventListener('click', () => {
-                this.chat.classList.toggle('active');
-            });
+            // Add event listeners
         }
     }
 
     // Make it globally available
     window.initEcomWidget = function(config) {
+        console.log('Initializing widget with config:', config);
         return new EcommerceWidget(config);
     };
 })();
